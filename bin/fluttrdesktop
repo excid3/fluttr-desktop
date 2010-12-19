@@ -15,15 +15,25 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 ### END LICENSE
 
-import simplejson
+import json
 import urllib2
 import sys
 import os
+import glib
 import gtk
+from threading import Thread
+
+gtk.gdk.threads_init()
 
 import gettext
 from gettext import gettext as _
 gettext.textdomain('fluttrdesktop')
+
+#import urllib
+#params = urllib.urlencode({"task[name]": "excid3", "task[content]": "ohai", "authenticity_token": "k8Xl52FvW+cgY07mX6eaZZCViLpO3zqlbXINR5dZ3mk="})
+#f = urllib2.urlopen("http://localhost:3000/excid3", params)
+#print f.read()
+#f.close()
 
 SITE = "http://fluttr.heroku.com/"
 
@@ -127,20 +137,21 @@ class FluttrdesktopWindow(gtk.Window):
         
         self.liststore.clear()
         self.name_entry.set_text("Example")
-        #self.load_list("excid3")
 
     def on_open_button_submit(self, widget, data=None):
         name = self.name_entry.get_text()
         self.liststore.clear()
+        self.treeview.set_sensitive(False)
 
         if name:
-            self.status.set_text("Loading %s" % name)
-            self.load_list(name)
-            self.treeview.set_sensitive(True)
+            self.status.set_text("Loading %s..." % name)
+            Thread(target=self.load_list,
+                   args=(name,
+                         (glib.idle_add, self.finished_loading))
+                  ).start()
+                                     
         else:
-            self.treeview.set_sensitive(False)
-
-        self.status.set_text("Ready")
+            self.status.set_text("Ready")
 
     def _get(self, name):
         """Return an object from the GTK interface based on name"""
@@ -150,12 +161,10 @@ class FluttrdesktopWindow(gtk.Window):
         """Return json for a given list name"""
         url = "".join([SITE, name, ".json"])
         print "Loading %s" % url
-        return simplejson.loads(urllib2.urlopen(url).read())
+        return json.loads(urllib2.urlopen(url).read())
         
-    def load_list(self, name):
+    def load_list(self, name, callback):
         """Load a given list into the treeview"""
-        
-        #TODO: Thread!
         
         incomplete = 0
         for item in self.load_json(name):
@@ -163,7 +172,15 @@ class FluttrdesktopWindow(gtk.Window):
             self.liststore.append([task["completed"], task["content"]])
 
             incomplete += not task["completed"]
-            
+        
+        # If we have a callback, use it
+        if callback:
+            callback[0](callback[1], name, incomplete)
+
+    def finished_loading(self, name, incomplete):
+        """When the thread has finished downloading a list"""
+        self.status.set_text("Ready")
+        self.treeview.set_sensitive(True)
         self.set_title("%s (%d) - Fluttr" % (name, incomplete))
 
     def about(self, widget, data=None):
@@ -208,4 +225,6 @@ if __name__ == "__main__":
     # Run the application.
     window = FluttrdesktopWindow()
     window.show()
+    gtk.gdk.threads_enter()
     gtk.main()
+    gtk.gdk.threads_leave()
