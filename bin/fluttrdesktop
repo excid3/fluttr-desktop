@@ -144,6 +144,8 @@ class FluttrdesktopWindow(gtk.Window):
     def load_list(self, name):
         """Load a given list into the treeview"""
         
+        #TODO: Thread!
+        
         incomplete = 0
         for item in self.load_json(name):
             task = item["task"]

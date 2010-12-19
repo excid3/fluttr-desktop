@@ -198,6 +198,7 @@
         <child>
           <object class="GtkToolbar" id="toolbar1">
             <property name="visible">True</property>
+            <property name="toolbar_style">both-horiz</property>
             <child>
               <object class="GtkToolItem" id="toolbutton1">
                 <property name="visible">True</property>
@@ -231,6 +232,41 @@
                     </child>
                   </object>
                 </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparatorToolItem" id="toolbutton2">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="add_task_toolbutton">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="label" translatable="yes">Add</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-add</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="delete_task_toolbutton">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="label" translatable="yes">Remove</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-remove</property>
               </object>
               <packing>
                 <property name="expand">False</property>
