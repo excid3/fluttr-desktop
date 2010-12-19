@@ -1,3 +1,4 @@
 project = fluttrdesktop
 version = 0.6.1
 template = ubuntu-application
+lp_id = fluttr-desktop
