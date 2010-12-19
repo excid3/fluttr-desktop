@@ -101,7 +101,7 @@
             </child>
             <child>
               <object class="GtkMenuItem" id="menuitem2">
-                <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="label" translatable="yes">_Edit</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
@@ -163,7 +163,7 @@
             </child>
             <child>
               <object class="GtkMenuItem" id="menuitem3">
-                <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="label" translatable="yes">_View</property>
                 <property name="use_underline">True</property>
               </object>
@@ -223,6 +223,8 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="relief">none</property>
+                        <property name="image_position">right</property>
                         <signal name="clicked" handler="on_open_button_submit"/>
                       </object>
                       <packing>

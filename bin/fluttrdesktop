@@ -37,13 +37,14 @@ gettext.textdomain('fluttrdesktop')
 
 SITE = "http://fluttr.heroku.com/"
 
+#TODO: FIXME so I use fluttr-desktop on Launchpad. It may need to be an Ubuntu package.
 # optional Launchpad integration
 # this shouldn't crash if not found as it is simply used for bug reporting
-try:
-    import LaunchpadIntegration
-    launchpad_available = True
-except:
-    launchpad_available = False
+#try:
+#    import LaunchpadIntegration
+#    launchpad_available = True
+#except:
+launchpad_available = False
 
 # Add project root directory (enable symlink, and trunk execution).
 PROJECT_ROOT_DIRECTORY = os.path.abspath(
@@ -107,7 +108,7 @@ class FluttrdesktopWindow(gtk.Window):
             # about LaunchpadIntegration
             helpmenu = self.builder.get_object('helpMenu')
             if helpmenu:
-                LaunchpadIntegration.set_sourcepackagename('fluttrdesktop')
+                LaunchpadIntegration.set_sourcepackagename('fluttr-desktop')
                 LaunchpadIntegration.add_items(helpmenu, 0, False, True)
             else:
                 launchpad_available = False
