@@ -162,13 +162,6 @@
               </object>
             </child>
             <child>
-              <object class="GtkMenuItem" id="menuitem3">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">_View</property>
-                <property name="use_underline">True</property>
-              </object>
-            </child>
-            <child>
               <object class="GtkMenuItem" id="menuitem4">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">_Help</property>
@@ -189,6 +182,13 @@
                 </child>
               </object>
             </child>
+            <child>
+              <object class="GtkMenuItem" id="menuitem3">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">_View</property>
+                <property name="use_underline">True</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -196,24 +196,46 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="hbox1">
+          <object class="GtkToolbar" id="toolbar1">
             <property name="visible">True</property>
             <child>
-              <object class="GtkLabel" id="label1">
+              <object class="GtkToolItem" id="toolbutton1">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Click open to start a todo list</property>
+                <child>
+                  <object class="GtkHBox" id="hbox2">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkEntry" id="name_entry">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">•</property>
+                        <signal name="activate" handler="on_open_button_submit"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="open_button">
+                        <property name="label" translatable="yes">Open</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <signal name="clicked" handler="on_open_button_submit"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="padding">5</property>
-                <property name="position">0</property>
+                <property name="homogeneous">True</property>
               </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
             </child>
           </object>
           <packing>
@@ -222,8 +244,9 @@
           </packing>
         </child>
         <child>
-          <object class="GtkTreeView" id="treeview1">
+          <object class="GtkTreeView" id="treeview">
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can_focus">True</property>
             <property name="model">liststore</property>
             <property name="headers_clickable">False</property>
@@ -263,7 +286,7 @@
             <property name="visible">True</property>
             <property name="spacing">2</property>
             <child>
-              <object class="GtkLabel" id="label2">
+              <object class="GtkLabel" id="status_label">
                 <property name="visible">True</property>
                 <property name="xalign">0</property>
                 <property name="xpad">5</property>
@@ -277,6 +300,7 @@
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="pack_type">end</property>
             <property name="position">3</property>
           </packing>
         </child>

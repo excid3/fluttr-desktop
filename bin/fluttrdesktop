@@ -5,6 +5,7 @@
 ### END LICENSE
 
 import simplejson
+import urllib2
 import sys
 import os
 import gtk
@@ -12,6 +13,8 @@ import gtk
 import gettext
 from gettext import gettext as _
 gettext.textdomain('fluttrdesktop')
+
+SITE = "http://fluttr.heroku.com/"
 
 # optional Launchpad integration
 # this shouldn't crash if not found as it is simply used for bug reporting
@@ -106,18 +109,49 @@ class FluttrdesktopWindow(gtk.Window):
 
         # Code for other initialization actions should be added here.
         
-        import urllib2
-        def load_json(name):
-            site = "http://fluttr.heroku.com/"
-            url ="".join([site, name, ".json"])
-            return simplejson.loads(urllib2.urlopen(url).read())
+        self.liststore = self._get("liststore")
+        self.treeview = self._get("treeview")
+        self.name_entry = self._get("name_entry")
+        self.status = self._get("status_label")
         
-        self.liststore = self.builder.get_object("liststore")
         self.liststore.clear()
+        self.name_entry.set_text("Example")
+        #self.load_list("excid3")
+
+    def on_open_button_submit(self, widget, data=None):
+        name = self.name_entry.get_text()
+        self.liststore.clear()
+
+        if name:
+            self.status.set_text("Loading %s" % name)
+            self.load_list(name)
+            self.treeview.set_sensitive(True)
+        else:
+            self.treeview.set_sensitive(False)
+
+        self.status.set_text("Ready")
+
+    def _get(self, name):
+        """Return an object from the GTK interface based on name"""
+        return self.builder.get_object(name)
+
+    def load_json(self, name):
+        """Return json for a given list name"""
+        url = "".join([SITE, name, ".json"])
+        print "Loading %s" % url
+        return simplejson.loads(urllib2.urlopen(url).read())
         
-        for item in load_json("excid3"):
+    def load_list(self, name):
+        """Load a given list into the treeview"""
+        
+        incomplete = 0
+        for item in self.load_json(name):
             task = item["task"]
             self.liststore.append([task["completed"], task["content"]])
+
+            incomplete += not task["completed"]
+            
+        self.set_title("%s (%d) - Fluttr" % (name, incomplete))
 
     def about(self, widget, data=None):
         """Display the about box for fluttrdesktop."""
