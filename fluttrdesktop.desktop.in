@@ -1,0 +1,8 @@
+[Desktop Entry]
+_Name=Fluttrdesktop
+_Comment=Fluttrdesktop application
+Categories=GNOME;Utility;
+Exec=fluttrdesktop
+Icon=fluttrdesktop
+Terminal=false
+Type=Application

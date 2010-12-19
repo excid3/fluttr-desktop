@@ -1,0 +1,3 @@
+project = fluttrdesktop
+version = 0.6.1
+template = ubuntu-application

@@ -1,0 +1,164 @@
+#!/usr/bin/python
+# -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
+### BEGIN LICENSE
+# This file is in the public domain
+### END LICENSE
+
+import simplejson
+import sys
+import os
+import gtk
+
+import gettext
+from gettext import gettext as _
+gettext.textdomain('fluttrdesktop')
+
+# optional Launchpad integration
+# this shouldn't crash if not found as it is simply used for bug reporting
+try:
+    import LaunchpadIntegration
+    launchpad_available = True
+except:
+    launchpad_available = False
+
+# Add project root directory (enable symlink, and trunk execution).
+PROJECT_ROOT_DIRECTORY = os.path.abspath(
+    os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0]))))
+
+if (os.path.exists(os.path.join(PROJECT_ROOT_DIRECTORY, 'fluttrdesktop'))
+    and PROJECT_ROOT_DIRECTORY not in sys.path):
+    sys.path.insert(0, PROJECT_ROOT_DIRECTORY)
+    os.putenv('PYTHONPATH', PROJECT_ROOT_DIRECTORY) # for subprocesses
+
+from fluttrdesktop import (
+    AboutFluttrdesktopDialog, PreferencesFluttrdesktopDialog)
+from fluttrdesktop.helpers import get_builder
+#Try adding AppIndicator. Will work after "qucikly add indicator"
+try:
+    from fluttrdesktop import indicator
+except:
+    indicator = False
+
+
+class FluttrdesktopWindow(gtk.Window):
+    __gtype_name__ = "FluttrdesktopWindow"
+    
+    # To construct a new instance of this method, the following notable 
+    # methods are called in this order:
+    # __new__(cls)
+    # __init__(self)
+    # finish_initializing(self, builder)
+    # __init__(self)
+    #
+    # For this reason, it's recommended you leave __init__ empty and put
+    # your inialization code in finish_intializing
+    
+    def __new__(cls):
+        """Special static method that's automatically called by Python when 
+        constructing a new instance of this class.
+        
+        Returns a fully instantiated FluttrdesktopWindow object.
+        """
+        builder = get_builder('FluttrdesktopWindow')
+        new_object = builder.get_object("fluttrdesktop_window")
+        new_object.finish_initializing(builder)
+        return new_object
+
+    def finish_initializing(self, builder):
+        """Called while initializing this instance in __new__
+
+        finish_initalizing should be called after parsing the UI definition
+        and creating a FluttrdesktopWindow object with it in order to finish
+        initializing the start of the new FluttrdesktopWindow instance.
+        
+        Put your initilization code in here and leave __init__ undefined.
+        """
+        # Get a reference to the builder and set up the signals.
+        self.builder = builder
+        self.builder.connect_signals(self)
+
+        global launchpad_available
+        if launchpad_available:
+            # see https://wiki.ubuntu.com/UbuntuDevelopment/Internationalisation/Coding for more information
+            # about LaunchpadIntegration
+            helpmenu = self.builder.get_object('helpMenu')
+            if helpmenu:
+                LaunchpadIntegration.set_sourcepackagename('fluttrdesktop')
+                LaunchpadIntegration.add_items(helpmenu, 0, False, True)
+            else:
+                launchpad_available = False
+            
+        
+        #AppIndicator support
+        #see http://owaislone.org/quickly-add-indicator/ 
+        # use 'quickly add indicator' to get started
+        # self is passed so methods of this class can be called from indicator.py
+        # Comment to disable appindicator
+        if indicator:
+            self.indicator = indicator.new_application_indicator(self)
+        # self.indicator is an appindicator instance.
+        # learn more about it here http://LINK-to-AppIndicator-Docs
+        
+        
+        # Uncomment the following code to read in preferences at start up.
+        #dlg = PreferencesFluttrdesktopDialog.PreferencesFluttrdesktopDialog()
+        #self.preferences = dlg.get_preferences()
+
+        # Code for other initialization actions should be added here.
+        
+        import urllib2
+        def load_json(name):
+            site = "http://fluttr.heroku.com/"
+            url ="".join([site, name, ".json"])
+            return simplejson.loads(urllib2.urlopen(url).read())
+        
+        self.liststore = self.builder.get_object("liststore")
+        self.liststore.clear()
+        
+        for item in load_json("excid3"):
+            task = item["task"]
+            self.liststore.append([task["completed"], task["content"]])
+
+    def about(self, widget, data=None):
+        """Display the about box for fluttrdesktop."""
+        about = AboutFluttrdesktopDialog.AboutFluttrdesktopDialog()
+        response = about.run()
+        about.destroy()
+
+    def preferences(self, widget, data=None):
+        """Display the preferences window for fluttrdesktop."""
+        prefs = PreferencesFluttrdesktopDialog.PreferencesFluttrdesktopDialog()
+        response = prefs.run()
+        if response == gtk.RESPONSE_OK:
+            # Make any updates based on changed preferences here.
+            pass
+        prefs.destroy()
+
+    def quit(self, widget, data=None):
+        """Signal handler for closing the FluttrdesktopWindow."""
+        self.destroy()
+
+    def on_destroy(self, widget, data=None):
+        """Called when the FluttrdesktopWindow is closed."""
+        # Clean up code for saving application state should be added here.
+        gtk.main_quit()
+
+if __name__ == "__main__":
+    # Support for command line options.
+    import logging
+    import optparse
+    parser = optparse.OptionParser(version="%prog %ver")
+    parser.add_option(
+        "-v", "--verbose", action="store_true", dest="verbose",
+        help=_("Show debug messages"))
+    (options, args) = parser.parse_args()
+
+    # Set the logging level to show debug messages.
+    if options.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+        logging.debug('logging enabled')
+
+    # Run the application.
+    window = FluttrdesktopWindow()
+    window.show()
+    gtk.main()
